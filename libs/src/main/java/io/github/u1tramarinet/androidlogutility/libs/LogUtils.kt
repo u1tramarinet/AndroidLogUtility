@@ -2,7 +2,7 @@ package io.github.u1tramarinet.androidlogutility.libs
 
 import android.util.Log
 
-@Suppress("MemberVisibilityCanBePrivate")
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 object LogUtils {
     fun funIn(message: String? = null) {
         print(Log.INFO, message)
