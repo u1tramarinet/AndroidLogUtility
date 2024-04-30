@@ -26,7 +26,7 @@ object LogUtils {
         val tag = acquireTag(targetElement)
         val link = acquireLink(targetElement)
         val prf = if (prefix != null) "$prefix " else ""
-        val msg = "$prf$message ($link)"
+        val msg = "$prf${message ?: ""} ($link)"
         Log.println(priority, tag, msg)
     }
 
