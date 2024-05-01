@@ -1,4 +1,4 @@
-package io.github.u1tramarinet.androidlogutility.libs
+package io.github.u1tramarinet.androidlogutility
 
 import org.junit.Test
 

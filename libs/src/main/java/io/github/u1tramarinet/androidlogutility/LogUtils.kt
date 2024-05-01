@@ -1,36 +1,43 @@
 package io.github.u1tramarinet.androidlogutility
 
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 object LogUtils {
     fun funIn(message: String? = null) {
-        print(Log.INFO, message)
+        print(Log.INFO, message, "[IN ]")
     }
 
-    fun funEnd(message: String? = null) {
-        print(Log.INFO, message)
+    fun funOut(message: String? = null) {
+        print(Log.INFO, message, "[OUT]")
     }
 
     fun d(message: String? = null) {
         print(Log.DEBUG, message)
     }
 
-    fun <T> T.withFunEnd(format: (result: T) -> String = { result -> "result=$result" }): T {
-        funEnd(format(this))
+    fun <T> T.withFunOut(format: (result: T) -> String = { result -> "result=$result" }): T {
+        funOut(format(this))
         return this
     }
 
     private fun print(priority: Int, message: String?, prefix: String? = null) {
         val targetElement = getStackTraceFirstElement()
         val tag = acquireTag(targetElement)
-        val link = acquireLink(targetElement)
-        val prf = if (prefix != null) "$prefix " else ""
-        val msg = "$prf${message ?: ""} ($link)"
+        val reference = "(${acquireMethod(targetElement)}@${acquireLink(targetElement)})"
+        val msg = listOfNotNull(prefix, message, reference)
+            .filter { it.isNotEmpty() }
+            .joinToString(separator = " ")
         Log.println(priority, tag, msg)
+        callback?.onPrint(priority, tag, msg)
     }
 
-    private fun acquireTag(element: StackTraceElement): String = element.className
+    private fun acquireTag(element: StackTraceElement): String =
+        element.className.split(".").last()
+
+    private fun acquireMethod(element: StackTraceElement): String =
+        element.methodName
 
     private fun acquireLink(element: StackTraceElement): String =
         "${element.fileName}:${element.lineNumber}"
@@ -43,5 +50,23 @@ object LogUtils {
         } ?: elements.last {
             it.fileName.contains(ownSimpleName)
         }
+    }
+
+    private var callback: Callback? = null
+
+    /**
+     * Test use only.
+     */
+    @VisibleForTesting
+    internal fun setCallback(callback: Callback?) {
+        this.callback = callback
+    }
+
+    /**
+     * Test use only.
+     */
+    @VisibleForTesting
+    internal interface Callback {
+        fun onPrint(priority: Int, tag: String, msg: String)
     }
 }
