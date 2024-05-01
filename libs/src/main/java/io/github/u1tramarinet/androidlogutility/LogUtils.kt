@@ -5,8 +5,8 @@ import androidx.annotation.VisibleForTesting
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 object LogUtils {
-    fun funIn(message: String? = null) {
-        print(Log.INFO, message, "[IN ]")
+    fun funIn(message: String? = null, arguments: List<LogArg> = listOf()) {
+        print(Log.INFO, message, "[IN ]", formatArguments(arguments))
     }
 
     fun funOut(message: String? = null) {
@@ -22,11 +22,21 @@ object LogUtils {
         return this
     }
 
-    private fun print(priority: Int, message: String?, prefix: String? = null) {
+    private fun formatArguments(arguments: List<LogArg>): String =
+        arguments.joinToString(separator = ",") { it.format() }
+
+    private fun print(
+        priority: Int,
+        message: String?,
+        prefix: String? = null,
+        arguments: String? = null,
+    ) {
         val targetElement = getStackTraceFirstElement()
         val tag = acquireTag(targetElement)
-        val reference = "(${acquireMethod(targetElement)}@${acquireLink(targetElement)})"
-        val msg = listOfNotNull(prefix, message, reference)
+        val method = "${acquireMethodName(targetElement)}(${arguments ?: ""})"
+        val content = listOfNotNull(method, message).joinToString(separator = ": ")
+        val reference = "[${acquireLink(targetElement)}]"
+        val msg = listOfNotNull(prefix, content, reference)
             .filter { it.isNotEmpty() }
             .joinToString(separator = " ")
         Log.println(priority, tag, msg)
@@ -36,7 +46,7 @@ object LogUtils {
     private fun acquireTag(element: StackTraceElement): String =
         element.className.split(".").last()
 
-    private fun acquireMethod(element: StackTraceElement): String =
+    private fun acquireMethodName(element: StackTraceElement): String =
         element.methodName
 
     private fun acquireLink(element: StackTraceElement): String =

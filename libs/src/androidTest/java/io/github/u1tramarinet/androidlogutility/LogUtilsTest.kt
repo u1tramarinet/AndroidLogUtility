@@ -2,10 +2,10 @@ package io.github.u1tramarinet.androidlogutility
 
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
-import org.junit.Assert.*
 
 /**
  * 出力内容確認用.
@@ -20,6 +20,23 @@ class LogUtilsTest {
         }
         assertLogLevel(Log.INFO) {
             LogUtils.funIn(message = "message")
+        }
+        assertLogLevel(Log.INFO) {
+            LogUtils.funIn(
+                arguments = listOf(
+                    LogArg("hoge", "foo"),
+                    LogArg("fuga", null)
+                )
+            )
+        }
+        assertLogLevel(Log.INFO) {
+            LogUtils.funIn(arguments = LogArgs.arg("hoge", "foo").arg("fuga", null))
+        }
+        assertLogLevel(Log.INFO) {
+            LogUtils.funIn(
+                message = "message",
+                arguments = LogArgs.arg("hoge", "foo").arg("fuga", null)
+            )
         }
     }
 
